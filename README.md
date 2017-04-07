@@ -5,5 +5,5 @@ This is a repository that holds the code and information for the introduction to
 # Contact
 If you have any questions or suggestions, please contact Spencer Fox through:
 
-        - twitter ([@foxandtheflu](https://twitter.com/foxandtheflu))
-        - email [email](mailto: spncrfx@gmail.com).
+- twitter ([@foxandtheflu](https://twitter.com/foxandtheflu))
+- [email](mailto:spncrfx@gmail.com)
