@@ -1,0 +1,283 @@
+---
+title: "Introduction to R and the tidyverse"
+author: "Spencer Fox"
+date: "October 20, 2016"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message = FALSE)
+```
+
+# Introduction
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML and PDF documents. R Markdown documents are useful for interspersing formatted text with `code`. There are many ways to write formatted text within markdown, and RStudio hosts a good [cheatsheet (See section #3)](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf).
+
+You run R code within chunks either line-by-line (ctrl-enter or cmd-enter), or all at once (see keyboard shortcuts). To do so, place your cursor on a line of code, and then press the keys to run the line. 
+
+## Installing and Loading Packages
+Here is a chunk of R code that installs all of the packages that will be used during the workshop. You should uncomment all of the lines (remove the `#`), select all lines, and then hit ctrl-enter or cmd-enter. You can also install packages using the install button on the packages pane in RStudio.
+
+```{r}
+# install.packages('ggmap')
+# install.packages('tidyverse')
+# install.packages('gapminder')
+# install.packages('cowplot')
+
+```
+
+# Using package functions
+The `ggmap` package is used for plotting maps and spatial data. We will use it today to learn how to run code in R, and to play around with functions a bit. 
+
+Note: You can supply arguments to chunks that can customize the behavior of those chunks. This chunk has the argument `cache=TRUE` supplied to it. This just tells the chunk to store the data and plots, so that knitting the document into an html or pdf is quicker (following the first knit).
+
+```{r, cache=TRUE}
+library(ggmap)
+
+## Plot a map of texas -- Note it searches an online database for maps matching "texas"
+qmap("texas", zoom=6, color="bw")
+
+## Plot a map of UT now
+qmap("University of Texas at Austin", zoom=15)
+
+# You can create a variable with the "=" sign
+pcl_location = geocode("101 E 21st St, Austin, TX 78712", source = "google")
+
+## Now use a ggmap function to plot the map with the point.
+## This is a function that is strung together with a "+" 
+ggmap(get_map("University of Texas at Austin", zoom = 15)) + 
+  geom_point(data=pcl_location, size = 7, shape = 13, color = "red")
+
+```
+
+Check out the environment pane on the top right of the RStudio screen. What do you notice? I tend to glance at that pane every once in a while to make sure variables are being created and changed as expected. e.g. we created the `pcl_location` variable in the previous chunk, so we can check to make sure it's there.
+
+
+## Exercise 1 
+Copy one of the `qmap()` lines of code from the previous chunk, and paste it in the next chunk. Change the number for the `zoom` parameter (Can only be 3-21), and change the location within the quotes. Can you get a map of Africa, how about one of your hometown?
+
+```{r}
+# R Code here
+
+```
+
+## Exercise 1 (extended) 
+Create a new variable called `home` that has your current or past home address saved. Then plot it on a map like we did for PCL.
+```{r}
+# R Code here
+
+```
+
+---------------------------
+
+# Introduction to dplyr
+
+Now that you know how to use R Markdown and have learned about variables and functions, let's play around with data frames using the tidyverse. Follow along with this during the presentation portion. The `tidyverse` is a system of packages created by [Hadley Wickham](http://hadley.nz/) that provide consistent and intuitive syntax for manipulating, analyzing, and visualizing data.
+
+## Using `filter`, `select`, and `%>%`
+The `filter` and `select` functions allow for easy subsetting of the data (selecting specific portions). `filter` extracts rows fulfilling a specified expression, and `select` extracts columns specified by name or index (number). You can also select columns by giving the function columns you don't want by simply adding a "-" in front of the column name.
+
+We can link functions/commands together using the `%>%` operator. `%>%` takes the output of the left function or variable and puts it by default as the first argument to the right function. So `df %>% head()` is the same as `head(df)`.
+
+```{r}
+library(tidyverse)
+library(gapminder)
+
+# These next two lines do the same thing
+gapminder %>% head()
+head(gapminder)
+
+# Example filtering rows
+gapminder %>% filter(year==1952)
+
+# These next two lines result in the same data frame
+gapminder %>% select(country:year)
+gapminder %>% select(country, continent, year)
+
+# We can link multiple statements together
+# So if we want only the population data for year 1952 we could do this:
+gapminder %>% filter(year==1952) %>%
+  select(country, year, pop)
+```
+
+### Exercise 2a
+
+Try to use `filter()` and `select()` to subset your data to include only the country, year, and life expectancy data from Belgium. 
+
+```{r}
+# R Code here
+
+```
+
+## Using `mutate`, `group_by`, and `summarise`
+`mutate` is a function that can add columns to data frames. Often times we make new columns in data frames out of combinations of old columns, and `mutate` makes this fairly straightforward. 
+
+`group_by` and `summarise` are commonly used in tandem. Often we want to summarise data for a specific group of data. For example if we had data for the heights of all people on campus, we might want to know the mean for the two genders. We first would group our data by the gender, and then summarise the data with the mean.
+
+```{r, cache=TRUE}
+# Add a gdp column using the per capita gdp and total population
+gapminder %>% mutate(gdp = gdpPercap * pop) 
+
+# Notice how the group component is added on
+gapminder %>% group_by(year) 
+
+# Once things are grouped, we can summarize multiple rows like this
+gapminder %>% group_by(year) %>%
+  summarise(mean_pc_gdp = mean(gdpPercap))
+
+# This is how we would save the resultant data frame, and we could
+# do this for any of the previous chunk statements.
+avg_gdp_by_year = gapminder %>% group_by(year) %>%
+  summarise(mean_pc_gdp = mean(gdpPercap))
+  
+
+```
+
+### Exercise 2b
+
+Try to use `mutate()`, `group_by`, and summarise to subset your data to add on a gdp column to `gapminder`, and then find the average gdp for each country. 
+
+```{r}
+# R Code here
+
+```
+
+----------------------------------------
+
+# Introduction to ggplot2 and tidyr
+Now we're going to discuss visualizing data using the `ggplot2` package. In doing so, we will also discover why tidy data is easy to work with, and therefore will learn about data reshaping/manipulation using `tidyr`. 
+
+## Basics of ggplot2
+The `ggplot2` package revolves around the `ggplot` function. We first specify the data, then the aesthetics, and finally the type of plot we would like to make. Further customization is possible, but we won't have time to talk much about those. the [ggplot2](http://docs.ggplot2.org/dev/index.html) documentation is a really helpful reference for understanding how to customize plots. 
+
+We will work with the `pew` dataset that is part of the `tidyr` vignette, but we need to download it from online. The data contain a number of religious affiliations, and then frequency of followers falling into a variety of income brackets.
+
+```{r, cache=TRUE}
+library(cowplot) # I prefer cowplot to ggplot default themes
+pew = read_csv("https://raw.githubusercontent.com/hadley/tidyr/master/vignettes/pew.csv")
+
+# Plot a scatterplot of the number of individauls in <10k bracket versus >150k
+pew %>% ggplot(aes(x = `<$10k`, y = `>150k`)) + 
+  geom_point()
+
+# Plot bar plot for <10k bracket for all religions
+# The x-axis labels overlap, but we can customize those
+pew %>% ggplot(aes(x = religion, y = `<$10k`)) + 
+  geom_bar(stat = "identity")
+
+```
+
+But what if we wanted to plot multiple income brackets? We would need to specify each column individually, and then somehow manually arrange them on the figure. This is where the `tidyr` package comes into play, which we will learn about next.
+
+### Exercise 3a
+Use the `gapminder` dataset and try to create a boxplot (`geom_boxplot()`) for the life expectancy of each continent.
+
+```{r}
+# R Code here
+
+```
+
+## Basics of tidyr
+The `tidyr` package contains many useful functions for cleaning and reshaping your data, but we will mainly talk about two of those (`spread` and `gather`). These functions are used to respectively convert long data to wide and wide data to long. Since it's more common for data to start out in wide format, we will primarily focus on the `gather` function. Tidy data are defined by the following two characteristics:
+
+1. Every variable forms a column
+2. Each observation forms a row
+
+What form are our `pew` data in?
+
+```{r}
+pew %>% head()
+```
+
+### `gather`
+The pew data are in what we call "wide" data format, where each row corresponds to a class and the columns correspond to characterisitics (observations) of that class. If we wanted to plot a bar for each observation, we need to convert our "wide" data to "long" formatting using the `gather` function from `tidyr`. 
+
+The format of gather should be as follows: `gather(key = observation_name, value = data_name, columns_being_gathered)` Where the `observation_name` is what you want to call the column that stores the column that stores the observation type, `data_name` should be what you want the column that stores the specific data values to be called, and `columns_being_gathered` should be the columns (using the same syntax as `select`) that you want to be gathered. `spread` has similar syntax and can be used to reverse gathering.
+
+```{r, cache=TRUE}
+# We want all columns gathered except for the religion column:
+pew %>% gather(key=income, value=frequency, -religion)
+
+# Alternatively:
+pew %>% gather(key=income, value=frequency, 2:11)
+
+# Use the spread to reverse gathering
+pew %>% gather(key=income, value=frequency, 2:11) %>%
+  spread(income, frequency)
+```
+
+### Exercise 3b
+Let's say you want to drop all of the pew data of people who are in the `Don't know/refused` column. Gather all of the income frequencies for all people in the columns that answered the question, without the `Don't know/refused` column. 
+
+Does the order in which you do things matter?
+
+```{r}
+# R Code here
+
+```
+
+
+----------------------------------------
+# Putting it all together
+
+We now have gone through all of the basics for data manipulation, analysis, and plotting. The cool thing about the `tidyverse` is that you can link as many of these pipes together as you'd like. I'd say you probably want to limit to a reasonable number for readability, but we can explore the `pew` data much more fully now. What if we wanted to plot the bar chart we had before, but with bars for all of the income brackets colored in?
+
+```{r, cache=TRUE}
+pew %>% gather(income, frequency, -religion) %>%
+  ggplot(aes(x = religion, y = frequency, fill=income)) + 
+  geom_bar(stat="identity") 
+
+```
+
+Customizing specific theme elements takes a bit more work, but can usually be solved through a quick google search. For example, we can fix the x axis labels this way:
+```{r, cache=TRUE}
+pew %>% gather(income, frequency, -religion) %>%
+  ggplot(aes(x = religion, y = frequency, fill=income)) + 
+  geom_bar(stat="identity") +
+  theme(axis.text.x=element_text(angle=45, hjust = 1, vjust = 1))
+```
+
+Let's go back to the `gapminder` dataset, as it is slightly more interesting for more complex examples.
+
+```{r, cache=TRUE}
+# We can plot lines for the life expectancy over time for each country
+gapminder %>%
+  ggplot(aes(year, lifeExp, group=country)) + 
+  geom_line()
+
+# We can add a overall trendline
+gapminder %>%
+  ggplot(aes(year, lifeExp)) + 
+  geom_point() +
+  stat_smooth()
+
+```
+
+## Exercise 4a
+What if we wanted to plot the mean life expectancy for each year across all of the countries? Try using everything you've learned to make that plot in a few concise lines!
+```{r}
+# R Code here
+
+```
+
+## Exercise 4b
+Now try plotting the mean life expectancy for just the continent of Africa. You should be able to do it by just adding one line to the chunk above!
+```{r}
+# R Code here
+
+```
+
+## Exercise 4c (Challenge)
+If you're up for a bit of a challenge try to make a scatterplot of the mean life expectancy versus the mean per capita gdp for each country and year. Hint: you can `summarise` two things at once to create two summary columns, and you can also `group_by` multiple columns.
+
+```{r}
+# R Code Here
+
+```
+
+
+
+
+
+
