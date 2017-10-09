@@ -136,7 +136,7 @@ avg_gdp_by_year = gapminder %>% group_by(year) %>%
 
 ### Exercise 2b
 
-Try to use `mutate()`, `group_by`, and summarise to subset your data to add on a gdp column to `gapminder`, and then find the average gdp for each country. 
+Try to use `mutate`, `group_by`, and `summarise` to subset your data to add on a gdp column to `gapminder`, and then find the average gdp for each country. 
 
 ```{r}
 # R Code here
@@ -171,7 +171,7 @@ pew %>% ggplot(aes(x = religion, y = `<$10k`)) +
 But what if we wanted to plot multiple income brackets? We would need to specify each column individually, and then somehow manually arrange them on the figure. This is where the `tidyr` package comes into play, which we will learn about next.
 
 ### Exercise 3a
-Use the `gapminder` dataset and try to create a boxplot (`geom_boxplot()`) for the life expectancy of each continent.
+Use the `gapminder` dataset and try to create a boxplot (`geom_boxplot()`) for the life expectancy of each continent. See: http://ggplot2.tidyverse.org/reference/#section-layer-geoms for all poosible geometries.
 
 ```{r}
 # R Code here
@@ -211,6 +211,13 @@ pew %>% gather(key=income, value=frequency, 2:11) %>%
 Let's say you want to drop all of the pew data of people who are in the `Don't know/refused` column. Gather all of the income frequencies for all people in the columns that answered the question, without the `Don't know/refused` column. 
 
 Does the order in which you do things matter?
+
+```{r}
+# R Code here
+
+```
+
+If you have time, print the data contained in the variable `table4a`. Do whatever you need to do to make it tidy.
 
 ```{r}
 # R Code here
