@@ -136,7 +136,7 @@ avg_gdp_by_year = gapminder %>% group_by(year) %>%
 
 ### Exercise 2b
 
-Try to use `mutate`, `group_by`, and `summarise` to subset your data to add on a gdp column to `gapminder`, and then find the average gdp for each country. 
+Try to use `mutate`, `group_by`, and `summarise` to subset your data to add on a gdp column to `gapminder`, and then find the average gdp for each country. Can you also add a column for the standard deviation of the gdp for each country?
 
 ```{r}
 # R Code here
@@ -184,14 +184,14 @@ The `tidyr` package contains many useful functions for cleaning and reshaping yo
 1. Every variable forms a column
 2. Each observation forms a row
 
-What form are our `pew` data in?
+Are the `pew` data tidy?
 
 ```{r}
 pew %>% head()
 ```
 
 ### `gather`
-The pew data are in what we call "wide" data format, where each row corresponds to a class and the columns correspond to characterisitics (observations) of that class. If we wanted to plot a bar for each observation, we need to convert our "wide" data to "long" formatting using the `gather` function from `tidyr`. 
+The pew data are actually in a messy data format, where each row corresponds to a class and the columns correspond to characterisitics (observations) of that class. If we wanted to plot a bar for each observation, we need to convert our "messy" data to "tidy" formatting using the `gather` function from `tidyr`. 
 
 The format of gather should be as follows: `gather(key = observation_name, value = data_name, columns_being_gathered)` Where the `observation_name` is what you want to call the column that stores the column that stores the observation type, `data_name` should be what you want the column that stores the specific data values to be called, and `columns_being_gathered` should be the columns (using the same syntax as `select`) that you want to be gathered. `spread` has similar syntax and can be used to reverse gathering.
 
